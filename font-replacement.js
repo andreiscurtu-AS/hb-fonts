@@ -9,28 +9,17 @@
         document.head.appendChild(link);
     }
     
-    // Create and inject CSS to override all Nunito fonts
+    // Create and inject CSS to override only Nunito fonts
     function injectFontCSS() {
         const style = document.createElement('style');
         style.textContent = `
-            /* Override all Nunito fonts with Futura PT 300 */
-            * {
-                font-family: 'Futura PT', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-                font-weight: 300 !important;
-            }
-            
-            /* Specific overrides for common elements */
-            body, p, div, span, h1, h2, h3, h4, h5, h6, 
-            .nunito, [style*="Nunito"], [class*="nunito"] {
-                font-family: 'Futura PT', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-                font-weight: 300 !important;
-            }
-            
-            /* Target elements that might have inline Nunito styles */
+            /* Target only Nunito fonts, preserve Alga and other fonts */
             [style*="font-family: Nunito"],
             [style*="font-family:Nunito"],
             [style*="font-family: 'Nunito'"],
-            [style*='font-family: "Nunito"'] {
+            [style*='font-family: "Nunito"'],
+            .nunito,
+            [class*="nunito"] {
                 font-family: 'Futura PT', sans-serif !important;
                 font-weight: 300 !important;
             }
@@ -38,34 +27,54 @@
         document.head.appendChild(style);
     }
     
-    // Function to process existing elements
+    // Check if an element uses Nunito font (not Alga or others)
+    function usesNunitoFont(element) {
+        const computedStyle = window.getComputedStyle(element);
+        const fontFamily = computedStyle.fontFamily.toLowerCase();
+        return fontFamily.includes('nunito') && !fontFamily.includes('alga');
+    }
+    
+    // Function to process existing elements - only Nunito users
     function replaceExistingFonts() {
-        const elements = document.querySelectorAll('*');
-        elements.forEach(el => {
-            const computedStyle = window.getComputedStyle(el);
-            if (computedStyle.fontFamily.includes('Nunito')) {
+        // Target common text elements instead of all elements for speed
+        const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, div, a, button, label, input, textarea');
+        
+        textElements.forEach(el => {
+            if (usesNunitoFont(el)) {
                 el.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
                 el.style.setProperty('font-weight', '300', 'important');
             }
         });
     }
     
-    // Observer to handle dynamically added content
+    // Debounced observer to handle dynamically added content
     function observeNewElements() {
+        let timeout;
+        
         const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                mutation.addedNodes.forEach(function(node) {
-                    if (node.nodeType === 1) { // Element node
-                        const elements = [node, ...node.querySelectorAll('*')];
-                        elements.forEach(el => {
-                            if (el.style && el.style.fontFamily && el.style.fontFamily.includes('Nunito')) {
-                                el.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
-                                el.style.setProperty('font-weight', '300', 'important');
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element node
+                            // Check the node itself
+                            if (usesNunitoFont(node)) {
+                                node.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
+                                node.style.setProperty('font-weight', '300', 'important');
                             }
-                        });
-                    }
+                            
+                            // Check text elements within the node
+                            const textElements = node.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, div, a, button, label');
+                            textElements.forEach(el => {
+                                if (usesNunitoFont(el)) {
+                                    el.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
+                                    el.style.setProperty('font-weight', '300', 'important');
+                                }
+                            });
+                        }
+                    });
                 });
-            });
+            }, 100); // 100ms debounce
         });
         
         observer.observe(document.body, {
@@ -79,10 +88,8 @@
         loadFuturaFont();
         injectFontCSS();
         
-        // Wait for fonts to load, then replace existing fonts
-        document.fonts.ready.then(() => {
-            replaceExistingFonts();
-        });
+        // Process existing fonts immediately, don't wait for font loading
+        replaceExistingFonts();
         
         // Start observing for new elements
         observeNewElements();
