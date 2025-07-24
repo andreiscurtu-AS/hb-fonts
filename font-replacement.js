@@ -9,17 +9,15 @@
         document.head.appendChild(link);
     }
     
-    // Create and inject CSS to override only Nunito fonts
+    // Create and inject CSS to override only spans with Nunito fonts
     function injectFontCSS() {
         const style = document.createElement('style');
         style.textContent = `
-            /* Target only explicit Nunito declarations */
-            [style*="font-family: Nunito"],
-            [style*="font-family:Nunito"],
-            [style*="font-family: 'Nunito'"],
-            [style*='font-family: "Nunito"'],
-            .nunito,
-            [class*="nunito"] {
+            /* Target only spans with explicit Nunito declarations */
+            span[style*="font-family: Nunito"],
+            span[style*="font-family:Nunito"],
+            span[style*="font-family: 'Nunito'"],
+            span[style*='font-family: "Nunito"'] {
                 font-family: 'Futura PT', sans-serif !important;
                 font-weight: 300 !important;
             }
@@ -27,36 +25,26 @@
         document.head.appendChild(style);
     }
     
-    // Check if an element explicitly uses Nunito font (avoid computed styles)
+    // Check if a span element explicitly uses Nunito font
     function usesNunitoFont(element) {
-        // Check inline styles first
+        // Only process span elements
+        if (element.tagName !== 'SPAN') return false;
+        
+        // Check inline styles only
         if (element.style.fontFamily) {
             const inlineFont = element.style.fontFamily.toLowerCase();
-            if (inlineFont.includes('alga')) return false;
-            if (inlineFont.includes('nunito')) return true;
+            return inlineFont.includes('nunito');
         }
         
-        // Check class names
-        const className = element.className || '';
-        if (className.toLowerCase().includes('nunito')) return true;
-        
-        // Check computed style only if no explicit indicators found
-        const computedStyle = window.getComputedStyle(element);
-        const fontFamily = computedStyle.fontFamily.toLowerCase();
-        
-        // Exclude elements that explicitly use Alga
-        if (fontFamily.includes('alga')) return false;
-        
-        // Only target if Nunito is explicitly mentioned
-        return fontFamily.includes('nunito');
+        return false;
     }
     
-    // Function to process existing elements - only Nunito users
+    // Function to process existing spans - only those with Nunito
     function replaceExistingFonts() {
-        // Target common text elements instead of all elements for speed
-        const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, div, a, button, label, input, textarea');
+        // Target only span elements
+        const spanElements = document.querySelectorAll('span');
         
-        textElements.forEach(el => {
+        spanElements.forEach(el => {
             if (usesNunitoFont(el)) {
                 el.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
                 el.style.setProperty('font-weight', '300', 'important');
@@ -74,15 +62,15 @@
                 mutations.forEach(function(mutation) {
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1) { // Element node
-                            // Check the node itself
+                            // Check the node itself if it's a span
                             if (usesNunitoFont(node)) {
                                 node.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
                                 node.style.setProperty('font-weight', '300', 'important');
                             }
                             
-                            // Check text elements within the node
-                            const textElements = node.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, div, a, button, label');
-                            textElements.forEach(el => {
+                            // Check span elements within the node
+                            const spanElements = node.querySelectorAll('span');
+                            spanElements.forEach(el => {
                                 if (usesNunitoFont(el)) {
                                     el.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
                                     el.style.setProperty('font-weight', '300', 'important');
