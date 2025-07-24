@@ -13,7 +13,7 @@
     function injectFontCSS() {
         const style = document.createElement('style');
         style.textContent = `
-            /* Target only Nunito fonts, preserve Alga and other fonts */
+            /* Target only explicit Nunito declarations */
             [style*="font-family: Nunito"],
             [style*="font-family:Nunito"],
             [style*="font-family: 'Nunito'"],
@@ -27,11 +27,28 @@
         document.head.appendChild(style);
     }
     
-    // Check if an element uses Nunito font (not Alga or others)
+    // Check if an element explicitly uses Nunito font (avoid computed styles)
     function usesNunitoFont(element) {
+        // Check inline styles first
+        if (element.style.fontFamily) {
+            const inlineFont = element.style.fontFamily.toLowerCase();
+            if (inlineFont.includes('alga')) return false;
+            if (inlineFont.includes('nunito')) return true;
+        }
+        
+        // Check class names
+        const className = element.className || '';
+        if (className.toLowerCase().includes('nunito')) return true;
+        
+        // Check computed style only if no explicit indicators found
         const computedStyle = window.getComputedStyle(element);
         const fontFamily = computedStyle.fontFamily.toLowerCase();
-        return fontFamily.includes('nunito') && !fontFamily.includes('alga');
+        
+        // Exclude elements that explicitly use Alga
+        if (fontFamily.includes('alga')) return false;
+        
+        // Only target if Nunito is explicitly mentioned
+        return fontFamily.includes('nunito');
     }
     
     // Function to process existing elements - only Nunito users
