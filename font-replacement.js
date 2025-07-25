@@ -1,5 +1,6 @@
-/* V1.04 */
+/* V2.00 - 25/07/2025 */
 
+// Fonts Replacement
 (function() {
     'use strict';
     
@@ -110,3 +111,20 @@
     }
     
 })();
+
+//Prevent click on dropdown
+// Prevent clicks on parent menu items that have submenus
+document.addEventListener('DOMContentLoaded', function() {
+    // Select the main links for Connect and Learn (items with submenus)
+    const parentMenuItems = document.querySelectorAll('a[href="/page/connect"], a[href="/page/conversations"]');
+    
+    parentMenuItems.forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            // Prevent the default link behavior
+            event.preventDefault();
+            
+            // Optionally, you can add some visual feedback or logging
+            console.log('Click prevented on:', link.textContent.trim());
+        });
+    });
+});
