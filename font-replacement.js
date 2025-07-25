@@ -1,4 +1,4 @@
-/* V2.00 - 25/07/2025 */
+/* V2.1 - 25/07/2025 */
  
 // Fonts Replacement
 (function() {
@@ -112,19 +112,51 @@
     
 })();
 
-//Prevent click on dropdown
-// Prevent clicks on parent menu items that have submenus
-document.addEventListener('DOMContentLoaded', function() {
-    // Select the main links for Connect and Learn (items with submenus)
-    const parentMenuItems = document.querySelectorAll('a[href="/page/connect"], a[href="/page/conversations"]');
+// Prevent click on dropdown
+// Prevent clicks on dropdown parent items - improved version
+(function() {
+    'use strict';
     
-    parentMenuItems.forEach(function(link) {
-        link.addEventListener('click', function(event) {
-            // Prevent the default link behavior
-            event.preventDefault();
-            
-            // Optionally, you can add some visual feedback or logging
-            console.log('Click prevented on:', link.textContent.trim());
+    function preventParentClicks() {
+        // More flexible selectors - adjust these to match your actual menu structure
+        const parentMenuItems = document.querySelectorAll('a[href*="/page/connect"], a[href*="/page/conversations"]');
+        
+        parentMenuItems.forEach(function(link) {
+            // Check if we've already added the listener to avoid duplicates
+            if (!link.hasAttribute('data-click-prevented')) {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    console.log('Click prevented on:', link.textContent.trim());
+                });
+                link.setAttribute('data-click-prevented', 'true');
+            }
         });
-    });
-});
+    }
+    
+    // Observer for dynamically added menu items
+    function observeMenuChanges() {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length > 0) {
+                    preventParentClicks();
+                }
+            });
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    function initClickPrevention() {
+        preventParentClicks();
+        observeMenuChanges();
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initClickPrevention);
+    } else {
+        initClickPrevention();
+    }
+})();
