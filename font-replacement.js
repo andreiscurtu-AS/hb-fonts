@@ -1,4 +1,4 @@
-/* V2.1 - 25/07/2025 */
+/* V2.2 - 25/07/2025 */
  
 // Fonts Replacement
 (function() {
@@ -126,6 +126,7 @@
             if (!link.hasAttribute('data-click-prevented')) {
                 link.addEventListener('click', function(event) {
                     event.preventDefault();
+                    event.stopPropagation(); // <--- This is the new line!
                     console.log('Click prevented on:', link.textContent.trim());
                 });
                 link.setAttribute('data-click-prevented', 'true');
