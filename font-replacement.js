@@ -1,4 +1,4 @@
-/* V03.00 - 29/07/2025 */
+/* V04.00 - 29/07/2025 */
  
 // Fonts Replacement
 (function() {
@@ -12,15 +12,15 @@
         document.head.appendChild(link);
     }
     
-    // Create and inject CSS to override only spans with Inter fonts
+    // Create and inject CSS to override only p tags with Inter fonts
     function injectFontCSS() {
         const style = document.createElement('style');
         style.textContent = `
-            /* Target only spans with explicit Inter declarations */
-            span[style*="font-family: Inter"],
-            span[style*="font-family:Inter"],
-            span[style*="font-family: 'Inter'"],
-            span[style*='font-family: "Inter"'] {
+            /* Target only p tags with explicit Inter declarations */
+            p[style*="font-family: Inter"],
+            p[style*="font-family:Inter"],
+            p[style*="font-family: 'Inter'"],
+            p[style*='font-family: "Inter"'] {
                 font-family: 'Futura PT', sans-serif !important;
                 font-weight: 300 !important;
             }
@@ -28,10 +28,10 @@
         document.head.appendChild(style);
     }
     
-    // Check if a span element explicitly uses Inter font
+    // Check if a p element explicitly uses Inter font
     function usesInterFont(element) {
-        // Only process span elements
-        if (element.tagName !== 'SPAN') return false;
+        // Only process p elements
+        if (element.tagName !== 'P') return false;
         
         // Check inline styles only
         if (element.style.fontFamily) {
@@ -42,12 +42,12 @@
         return false;
     }
     
-    // Function to process existing spans - only those with Inter
+    // Function to process existing p tags - only those with Inter
     function replaceExistingFonts() {
-        // Target only span elements
-        const spanElements = document.querySelectorAll('span');
+        // Target only p elements
+        const pElements = document.querySelectorAll('p');
         
-        spanElements.forEach(el => {
+        pElements.forEach(el => {
             if (usesInterFont(el)) {
                 el.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
                 el.style.setProperty('font-weight', '300', 'important');
@@ -65,15 +65,15 @@
                 mutations.forEach(function(mutation) {
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1) { // Element node
-                            // Check the node itself if it's a span
+                            // Check the node itself if it's a p
                             if (usesInterFont(node)) {
                                 node.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
                                 node.style.setProperty('font-weight', '300', 'important');
                             }
                             
-                            // Check span elements within the node
-                            const spanElements = node.querySelectorAll('span');
-                            spanElements.forEach(el => {
+                            // Check p elements within the node
+                            const pElements = node.querySelectorAll('p');
+                            pElements.forEach(el => {
                                 if (usesInterFont(el)) {
                                     el.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
                                     el.style.setProperty('font-weight', '300', 'important');
