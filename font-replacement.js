@@ -1,4 +1,4 @@
-/* V04.00 - 29/07/2025 */
+/* V05.00 - 29/07/2025 */
  
 // Fonts Replacement
 (function() {
@@ -12,15 +12,15 @@
         document.head.appendChild(link);
     }
     
-    // Create and inject CSS to override only p tags with Inter fonts
+    // Create and inject CSS to override all elements with Inter fonts
     function injectFontCSS() {
         const style = document.createElement('style');
         style.textContent = `
-            /* Target only p tags with explicit Inter declarations */
-            p[style*="font-family: Inter"],
-            p[style*="font-family:Inter"],
-            p[style*="font-family: 'Inter'"],
-            p[style*='font-family: "Inter"'] {
+            /* Target all elements with explicit Inter declarations */
+            [style*="font-family: Inter"],
+            [style*="font-family:Inter"],
+            [style*="font-family: 'Inter'"],
+            [style*='font-family: "Inter"'] {
                 font-family: 'Futura PT', sans-serif !important;
                 font-weight: 300 !important;
             }
@@ -28,11 +28,8 @@
         document.head.appendChild(style);
     }
     
-    // Check if a p element explicitly uses Inter font
+    // Check if an element explicitly uses Inter font
     function usesInterFont(element) {
-        // Only process p elements
-        if (element.tagName !== 'P') return false;
-        
         // Check inline styles only
         if (element.style.fontFamily) {
             const inlineFont = element.style.fontFamily.toLowerCase();
@@ -42,12 +39,12 @@
         return false;
     }
     
-    // Function to process existing p tags - only those with Inter
+    // Function to process existing elements - only those with Inter
     function replaceExistingFonts() {
-        // Target only p elements
-        const pElements = document.querySelectorAll('p');
+        // Target all elements
+        const allElements = document.querySelectorAll('*');
         
-        pElements.forEach(el => {
+        allElements.forEach(el => {
             if (usesInterFont(el)) {
                 el.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
                 el.style.setProperty('font-weight', '300', 'important');
@@ -65,15 +62,15 @@
                 mutations.forEach(function(mutation) {
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1) { // Element node
-                            // Check the node itself if it's a p
+                            // Check the node itself
                             if (usesInterFont(node)) {
                                 node.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
                                 node.style.setProperty('font-weight', '300', 'important');
                             }
                             
-                            // Check p elements within the node
-                            const pElements = node.querySelectorAll('p');
-                            pElements.forEach(el => {
+                            // Check all elements within the node
+                            const allElements = node.querySelectorAll('*');
+                            allElements.forEach(el => {
                                 if (usesInterFont(el)) {
                                     el.style.setProperty('font-family', 'Futura PT, sans-serif', 'important');
                                     el.style.setProperty('font-weight', '300', 'important');
